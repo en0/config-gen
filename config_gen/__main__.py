@@ -9,7 +9,8 @@ def list_keys(library, store, profile):
     """ List all keys in the profile """
     lib = Library(fp=library)
     ks = lib.get_keystore(store)
-    return ["{}\n".format(n) for n in ks.get_keys(profile)]
+    return ["{} = {}\n".format(k, v) 
+            for k, v in ks.get_profile_dict(profile).iteritems()]
 
 
 def get_key(library, store, profile, key):
