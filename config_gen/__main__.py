@@ -2,6 +2,7 @@ import sys
 from argparse import ArgumentParser, FileType
 from library import Library
 from keystore import Keystore
+from template_processor import TemplateProcessor
 from jinja2 import Template
 
 
@@ -64,19 +65,22 @@ def add_store(library, store, profile, name, ks_type, uri):
     yield " [SUCCESS]\n"
 
 
-def render_template(library, store, profile, source):
-    yield "Rendering template from {}/{}".format(store, profile)
+def render_template(library, store, profile, source, stdout):
+    if not stdout:
+        yield "Rendering template from {}/{}...".format(store, profile)
+
     lib = Library(fp=library)
     ks = lib.get_keystore(store)
+    tp = TemplateProcessor(fp=source)
     kvp = ks.get_profile_dict(profile)
 
-    _target = source.readline().decode('utf-8').rstrip('\n')
-    t = Template(source.read().decode('utf-8'))
+    if not stdout:
+        tp.render_file(profile, ks)
+    else:
+        tp.render_fp(profile, ks, sys.stdout)
 
-    with open(_target, 'w') as fp:
-        fp.write(t.render(**kvp))
-
-    yield " [SUCCESS]\n"
+    if not stdout:
+        yield " [SUCCESS]\n"
 
 
 def get_opts(args):
@@ -133,6 +137,22 @@ def get_opts(args):
         type=str
     )
 
+    _add_key = sap.add_parser(
+        'add-key',
+        help="Same as set-key"
+    )
+    _add_key.set_defaults(fn=set_key)
+    _add_key.add_argument(
+        "KEY",
+        help="The name of the key.",
+        type=str
+    )
+    _add_key.add_argument(
+        "VALUE",
+        help="The value to set on the key.",
+        type=str
+    )
+
     _list_profiles = sap.add_parser(
         'list-profiles',
         help="List all available profiles for the store."
@@ -183,6 +203,12 @@ def get_opts(args):
         help="Render a template."
     )
     _render_template.set_defaults(fn=render_template)
+    _render_template.add_argument(
+        "-s", "--stdout",
+        help="Render template to STDOUT",
+        action="store_true",
+        default=False
+    )
     _render_template.add_argument(
         "SOURCE",
         help="The path to the template to render.",
