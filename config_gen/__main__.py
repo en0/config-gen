@@ -247,6 +247,7 @@ def main(args=None):
         else:
             _message = str(ex)
         sys.stderr.write("\nERROR: {}\n".format(_message))
+        exit(1)
 
 
 def cfgen(args=None):
