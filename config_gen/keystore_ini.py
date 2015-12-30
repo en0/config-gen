@@ -1,5 +1,5 @@
 from exception import ProfileNotFoundException, KeyNotFoundException
-from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
+from ConfigParser import RawConfigParser, NoOptionError, NoSectionError
 from urlparse import urlparse
 from os.path import split
 
@@ -9,7 +9,7 @@ class KeystoreIni(object):
     __KS_TYPE__ = "ini"
 
     def __init__(self, **kwargs):
-        self._cp = SafeConfigParser(defaults={"__ver__": self.__VER__})
+        self._cp = RawConfigParser(defaults={"__ver__": self.__VER__})
 
     @property
     def version(self):
@@ -84,7 +84,6 @@ class KeystoreIni(object):
     def get_profile_dict(self, profile):
         _profile = profile.upper()
         _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
-        _p = {}
-        for k in self.get_keys(_profile):
-            _p[k] = self.get(_profile, k)
-        return _p
+        return dict(
+            [(k, v) for k, v in self._cp.items(_profile) if k != "__ver__"]
+        )
