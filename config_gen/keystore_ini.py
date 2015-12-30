@@ -80,7 +80,9 @@ class KeystoreIni(object):
             )
 
     def add_profile(self, profile):
-        self._cp.add_section(profile.upper())
+        _profile = profile.upper()
+        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
+        self._cp.add_section(_profile)
 
     def get_profile_dict(self, profile):
         _profile = profile.upper()
