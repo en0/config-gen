@@ -10,6 +10,7 @@ class KeystoreIni(object):
 
     def __init__(self, **kwargs):
         self._cp = RawConfigParser(defaults={"__ver__": self.__VER__})
+        self._cp.optionxform = str
 
     @property
     def version(self):
@@ -54,7 +55,7 @@ class KeystoreIni(object):
             self._cp.write(fp)
         self._path = _path
 
-    def get(self, profile, key, default=None):
+    def get(self, profile, key):
         _profile = profile.upper()
         _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
         try:
