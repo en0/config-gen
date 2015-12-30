@@ -8,6 +8,11 @@ class KeystoreIni(object):
     __VER__ = "ini.0.1"
     __KS_TYPE__ = "ini"
 
+    @classmethod
+    def _clean_profile_name(cls, profile):
+        _profile = profile.upper()
+        return "_DEFAULT" if _profile == "DEFAULT" else _profile
+
     def __init__(self, **kwargs):
         self._cp = RawConfigParser(defaults={"__ver__": self.__VER__})
         self._cp.optionxform = str
@@ -30,10 +35,8 @@ class KeystoreIni(object):
         return ['default' if x == '_DEFAULT' else x.lower() for x in _ret]
 
     def get_keys(self, profile):
-        _profile = profile.upper()
-        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
         try:
-            _ret = self._cp.options(_profile)
+            _ret = self._cp.options(self._clean_profile_name(profile))
         except NoSectionError:
             raise ProfileNotFoundException(
                 "Profile '{}' does not exist.".format(profile)
@@ -56,10 +59,8 @@ class KeystoreIni(object):
         self._path = _path
 
     def get(self, profile, key):
-        _profile = profile.upper()
-        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
         try:
-            return self._cp.get(_profile, key)
+            return self._cp.get(self._clean_profile_name(profile), key)
         except NoSectionError:
             raise ProfileNotFoundException(
                 "Profile '{}' does not exist".format(profile)
@@ -70,23 +71,20 @@ class KeystoreIni(object):
             )
 
     def set(self, profile, key, value):
-        _profile = profile.upper()
-        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
         try:
-            self._cp.set(_profile, key, value)
+            self._cp.set(self._clean_profile_name(profile), key, value)
         except NoSectionError:
             raise ProfileNotFoundException(
                 "Profile '{}' does not exist".format(profile)
             )
 
     def add_profile(self, profile):
-        _profile = profile.upper()
-        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
-        self._cp.add_section(_profile)
+        self._cp.add_section(self._clean_profile_name(profile))
 
     def get_profile_dict(self, profile):
-        _profile = profile.upper()
-        _profile = "_DEFAULT" if _profile == "DEFAULT" else _profile
-        return dict(
-            [(k, v) for k, v in self._cp.items(_profile) if k != "__ver__"]
-        )
+        return dict([
+            (k, v)
+            for k, v
+            in self._cp.items(self._clean_profile_name(profile))
+            if k != "__ver__"
+        ])
