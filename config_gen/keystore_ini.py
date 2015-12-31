@@ -1,12 +1,12 @@
+from keystore_interface import KeystoreInterface
 from exception import ProfileNotFoundException, KeyNotFoundException
 from ConfigParser import RawConfigParser, NoOptionError, NoSectionError
 from urlparse import urlparse
 from os.path import split
 
 
-class KeystoreIni(object):
+class KeystoreIni(KeystoreInterface):
     __VER__ = "ini.0.1"
-    __KS_TYPE__ = "ini"
 
     @classmethod
     def _clean_profile_name(cls, profile):
@@ -14,16 +14,13 @@ class KeystoreIni(object):
         return "_DEFAULT" if _profile == "DEFAULT" else _profile
 
     def __init__(self, **kwargs):
+        super(KeystoreIni, self).__init__("ini")
         self._cp = RawConfigParser(defaults={"__ver__": self.__VER__})
         self._cp.optionxform = str
 
     @property
     def version(self):
         return self._cp.get("DEFAULT", "__ver__")
-
-    @property
-    def ks_type(self):
-        return self.__KS_TYPE__
 
     @property
     def uri(self):
