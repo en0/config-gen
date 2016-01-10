@@ -49,7 +49,7 @@ Second, the render processor uses the jinja2 template engine so keys must be
 referenced according to jinja 2 syntax: {{ KEY }}.
 
 Example config.template:
-```json
+```ini
 ./config.ini
 [some-section]
 app_db: {{ APPLICATION_DATABASE_URI }}
