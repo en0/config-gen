@@ -1,6 +1,7 @@
 from adapters import get_adapters
 from argparse import ArgumentParser, FileType
 from library import Library
+from template_processor import TemplateProcessor
 from os import environ, path
 import logging
 import sys
@@ -111,8 +112,8 @@ def ep_set_key_value(library, store, key, value):
         key: The name of the key.
         value: The value to set on <key>.
     """
-    logging.debug("Loading library: {}".format(library))
-    lib = Library(path=library)
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
     logging.debug("Loading keystore: {}".format(store))
     ks = lib.get_keystore(store)
     logging.info("Setting value: {}={}".format(key, value))
@@ -127,8 +128,8 @@ def ep_get_key_value(library, store, key):
         store: The name of the keystore.
         key: The name of the key.
     """
-    logging.debug("Loading library: {}".format(library))
-    lib = Library(path=library)
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
     logging.debug("Loading keystore: {}".format(store))
     ks = lib.get_keystore(store)
     print "{} = {}".format(key, ks[key])
@@ -141,8 +142,8 @@ def ep_list_keys(library, store):
         library: A open file pointer to the library.
         store: The name of the keystore.
     """
-    logging.debug("Loading library: {}".format(library))
-    lib = Library(path=library)
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
     logging.debug("Loading keystore: {}".format(store))
     ks = lib.get_keystore(store)
     print "Keys:"
@@ -157,8 +158,8 @@ def ep_del_key(library, store, key):
         store: The name of the keystore.
         key: The name of the key.
     """
-    logging.debug("Loading library: {}".format(library))
-    lib = Library(path=library)
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
     logging.debug("Loading keystore: {}".format(store))
     ks = lib.get_keystore(store)
     logging.info("Removing key: {}".format(key))
@@ -172,12 +173,83 @@ def ep_dump_keystore(library, store):
         library: A open file pointer to the library.
         store: The name of the keystore.
     """
-    logging.debug("Loading library: {}".format(library))
-    lib = Library(path=library)
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
     logging.debug("Loading keystore: {}".format(store))
     ks = lib.get_keystore(store)
     logging.info("Dumping keys for {}".format(store))
     print "\n".join(["{} = {}".format(k, v) for k, v in ks.iteritems()])
+
+
+def ep_render_template(library, store, template, output=None):
+    """Render a template using the given store from the gien library.
+
+    If output is not provided, the path identified in the template will be
+    used as the output target.
+
+    Arguments:
+        library: A open file pointer to the library.
+        store: The name of the keystore.
+        template: A open file pointer to the template to render.
+        output: A optional open file pointer to write the rendered template to.
+    """
+    logging.debug("Loading library: {}".format(library.name))
+    lib = Library(fp=library)
+    logging.debug("Loading keystore: {}".format(store))
+    ks = lib.get_keystore(store)
+    logging.debug("Loading template: {}".format(template.name))
+    tmpl = TemplateProcessor(template)
+
+    if output:
+        logging.info("Rendering template with override: {} => {}".format(
+            template.name, output
+        ))
+        tmpl.render_fp(ks, output)
+    else:
+        logging.info("Rendering template: {} => {}".format(
+            template.name, tmpl.target_path
+        ))
+        tmpl.render_file(ks)
+
+
+def main_render(args=None):
+    """Render a template.
+
+    Command line entry point. See -h for options.
+    """
+    _args = args or sys.argv[1:]
+    ap = ArgumentParser(description="Render a template.")
+    ap.add_argument(
+        '-v', '--verbose',
+        action="count",
+        help="Set verbosity"
+    )
+    ap.add_argument(
+        '-l', '--library',
+        help="Path to the library. Default: ~/.config-lib.ini",
+        type=FileType('r'),
+        default=path.join(environ["HOME"], ".config-lib.ini")
+    )
+    ap.add_argument(
+        '-s', '--store',
+        help="The name of the keystore. Default: default",
+        default="default"
+    )
+    ap.add_argument(
+        '-t', '--template',
+        help="Path to the template to render. Default ./config.template",
+        type=FileType('r'),
+        default="./config.template"
+    )
+    ap.add_argument(
+        '-o', '--output',
+        help="Override the output file to write the rendered template to.",
+        type=FileType('w'),
+        default=None
+    )
+
+    _opts = ap.parse_args(_args)
+    exec_ep(ep_render_template, _opts)
 
 
 def main_keys(args=None):
@@ -351,4 +423,4 @@ def exec_ep(fn, opts):
 
 
 if __name__ == "__main__":
-    main_keys()
+    main_render()
