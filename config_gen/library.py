@@ -1,8 +1,8 @@
 from ConfigParser import SafeConfigParser
+from adapters import get_adapters
 from exception import KeystoreExistsException, InvalidKeystoreException
 from exception import UnkonwnAdapterException
 from keystore import Keystore
-from adapters import get_adapters
 
 
 def _normalize_store_name(s):
