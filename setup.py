@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="config-gen",
-    version="0.2",
+    version="1.0",
     packages=['config_gen', 'config_gen.adapters'],
     description="Configuration Generation using templates.",
     author="Ian Laird",

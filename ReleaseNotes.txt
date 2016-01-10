@@ -1,0 +1,8 @@
+Version 1.0
+The following features are available in version 1.0
+- Library initialization that will create a library and it's default keystore.
+- The ability to add and remove additional keystores from an existing library.
+- Basic keystore management support (get/set/del keys and values)
+- Keystore adapater model to allow for easy addition of keystore types.
+- Builtin support for ini based keystores.
+- Rendering a template using a specific or default keystore.
