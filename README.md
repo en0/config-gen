@@ -83,7 +83,7 @@ of the options.
 __WARNING: config-gen-init initializes a NEW library. If the specified target
 already exists, the existing refrences will be clobbered.__
 
-## config-gen-ks
+## config-gen-store
 This tool is used to manage keystores within a library. You can create
 keystores for each of your environments or each of your applications or both.
 It all depends on how you want to use it.
