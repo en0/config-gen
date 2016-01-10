@@ -1,10 +1,8 @@
-from os import environ
-from os.path import join
 from ConfigParser import SafeConfigParser
 from exception import KeystoreExistsException, InvalidKeystoreException
 from exception import UnkonwnAdapterException
 from keystore import Keystore
-from .adapaters import get_adapters
+from adapters import get_adapters
 
 
 def _normalize_store_name(s):
@@ -22,8 +20,11 @@ class Library(object):
             self._cp.readfp(fp)
         else:
             self._fp = None
-            self._path = path or join(environ["HOME"], ".conflib.ini")
+            self._path = path
             self._cp.read(self._path)
+
+        if not fp and not path:
+            raise Exception("Missing persistant storage refrence.")
 
     def get_keystore(self, name):
         _store = _normalize_store_name(name)
@@ -96,4 +97,3 @@ class Library(object):
             else:
                 _ret.append("default")
         return _ret
-

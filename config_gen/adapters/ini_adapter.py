@@ -24,8 +24,11 @@ class IniAdapter(object):
 
     def __init__(self, uri):
         _uri = urlparse(uri, scheme="file://")
-        self._section = _uri.query or '_default'
+        self._section = _uri.query.lower() or '_default'
         self._path = _uri.path
+
+        if self._section == 'default':
+            self._section = '_default'
 
         self._cp = RawConfigParser()
         self._cp.optionxform = str
