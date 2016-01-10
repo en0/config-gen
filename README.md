@@ -13,21 +13,21 @@ To get started using config-gen, there are a few things you need to do. Please
 keep in mind that there are many ways to use this tool and here we only provide
 a basic use-case.
 
-1. Clone the project and install the package.
+- Clone the project and install the package.
 
 ```bash
 # Install config-gen
 python2 setup.py install
 ```
 
-2. Initialize the default library. Note, use -h to see other options for init.
+- Initialize the default library. Note, use -h to see other options for init.
 
 ```bash
 # Initialize library
 config-gen-init
 ```
 
-3. Setup your default keystore.
+- Setup your default keystore.
 You will need to add keys to your keystore. Items such as database passwords or
 log levels that make sense for your environment.
 
@@ -37,7 +37,7 @@ config-gen-keys add PYTHON_LOGLEVEL DEBUG
 config-gen-keys add APPLICATION_DATABASE_URI mysql://user:password@host/app
 ```
 
-4. Create your application configuration template.
+- Create your application configuration template.
 The configuration template would be located in the application directory that
 uses the configuration file. The template has a specific format but can be used
 with any structure assuming the requirements below are met.
@@ -59,7 +59,7 @@ log_level: {{ PYTHON_LOGLEVEL }}
 _NOTE: Since jinja2 is used, any jinja2 directives can be used including loops,
 branching and raw directives. See jinja2 documentation for details._
 
-5. You are ready to render your template.
+- You are ready to render your template.
 Make sure your current working directory contains your config.template that you
 want to render. See -h for more options.
 
@@ -158,7 +158,9 @@ standard INI format and can be used for local key storage for multiple
 environments or applications. 
 
 The URI for the ini adapter can specify the path and section to use. Here is
-the structure: file://<PATH>?<SECTION>.
+the structure: 
+
+```file://<PATH>?<SECTION>```
 
 The ini file can already exist when you add it to a library, provided it is in
 the correct format. Also, Each section is used as one keystore. This allows you
@@ -167,10 +169,10 @@ to store multiple keystores in one ini file.
 Example:
 ```ini
 [_DEFAULT]
-some_key=value1
+some_key=Some value
 
 [DEVEL]
-some_key=Some other vaule1
+some_key=Some other vaule
 ```
 
 _Note: If no section is provided, a default name will be used. This is not the
