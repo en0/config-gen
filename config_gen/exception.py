@@ -1,14 +1,10 @@
-class ProfileNotFoundException(Exception):
-    pass
-
-
-class KeyNotFoundException(Exception):
-    pass
-
-
-class LibraryExistsException(Exception):
+class InvalidKeystoreException(Exception):
     pass
 
 
 class KeystoreExistsException(Exception):
+    pass
+
+
+class UnkonwnAdapterException(Exception):
     pass

@@ -1,12 +1,17 @@
-from os import environ
-from os.path import join
-from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
-from exception import KeystoreExistsException
+from ConfigParser import SafeConfigParser
+from adapters import get_adapters
+from exception import KeystoreExistsException, InvalidKeystoreException
+from exception import UnkonwnAdapterException
 from keystore import Keystore
 
 
+def _normalize_store_name(s):
+    return "_DEFAULT" if s.upper() == "DEFAULT" else s.upper()
+
+
 class Library(object):
-    def __init__(self, path=None, fp=None):
+    def __init__(self, path=None, fp=None, adapters=None):
+        self._adapters = adapters or get_adapters()
         self._cp = SafeConfigParser()
         self._store_cache = {}
         if fp:
@@ -15,44 +20,66 @@ class Library(object):
             self._cp.readfp(fp)
         else:
             self._fp = None
-            self._path = path or join(environ["HOME"], ".conflib.ini")
+            self._path = path
             self._cp.read(self._path)
 
+        if not fp and not path:
+            raise Exception("Missing persistant storage refrence.")
+
     def get_keystore(self, name):
-        _store = name.upper()
+        _store = _normalize_store_name(name)
 
         if _store in self._store_cache:
             return self._store_cache[_store]
 
-        try:
-            _ks_type = self._cp.get(_store, "type")
-            _uri = self._cp.get(_store, "uri")
+        if not self._cp.has_section(_store):
+            raise InvalidKeystoreException("Store does not exist")
 
-        except (NoOptionError, NoSectionError):
-            raise Exception(
-                "This store does not exist or is not properly formated"
+        _opts = dict(self._cp.items(_store))
+
+        if "type" not in _opts or "uri" not in _opts:
+            raise InvalidKeystoreException(
+                "This store is not properly formated"
             )
 
-        ks = Keystore(_ks_type)
-        ks.load(_uri)
+        if _opts["type"] not in self._adapters:
+            raise UnkonwnAdapterException(
+                "Unkonwn keystore type '{}'".format(_opts["type"])
+            )
+
+        _uri = _opts["uri"]
+        _type = _opts["type"]
+
+        del _opts["type"]
+        del _opts["uri"]
+
+        ks = Keystore(self._adapters[_type])
+        ks.load(_uri, **_opts)
 
         self._store_cache[_store] = ks
 
         return ks
 
-    def add_keystore(self, name, ks):
-        _store = name.upper()
+    def add_keystore(self, name, ks_type, uri, **kwargs):
+        _store = _normalize_store_name(name)
 
         if self._cp.has_section(_store):
             raise KeystoreExistsException("That keystore is already added")
 
-        if _store != "DEFAULT":
-            self._cp.add_section(_store)
+        kwargs["type"] = ks_type
+        kwargs["uri"] = uri
 
-        self._cp.set(_store, "type", ks.ks_type)
-        self._cp.set(_store, "uri", ks.uri)
+        self._cp.add_section(_store)
+        for k, v in kwargs.iteritems():
+            self._cp.set(_store, k, v)
 
-        self._store_cache[_store] = ks
+    def remove_keystore(self, name):
+        _store = _normalize_store_name(name)
+
+        if not self._cp.has_section(_store):
+            raise InvalidKeystoreException("Store does not exist")
+
+        self._cp.remove_section(_store)
 
     def save(self):
         if self._fp:
@@ -63,7 +90,10 @@ class Library(object):
 
     @property
     def stores(self):
-        _ret = self._cp.sections()
-        if self._cp.has_option("DEFAULT", "type"):
-            _ret.insert(0, "DEFAULT")
-        return [x.lower() for x in _ret]
+        _ret = []
+        for x in self._cp.sections():
+            if x != "_DEFAULT":
+                _ret.append(x.lower())
+            else:
+                _ret.append("default")
+        return _ret
