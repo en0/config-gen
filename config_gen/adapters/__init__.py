@@ -1,8 +1,10 @@
 from ini_adapter import IniAdapter
+from redis_adapter import RedisAdapter
 import inspect
 
 __all__ = [
-    "IniAdapter"
+    "IniAdapter",
+    "RedisAdapter"
 ]
 
 
