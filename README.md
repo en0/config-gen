@@ -96,8 +96,8 @@ the only limitation is that no spaces and some special characters cannot be
 used. (Character limitations depend on the keystore type).
 
 The keystore type tells the system what format the keystore is in. Currently
-only INI types are supported but can be extended by adding your own adapters to
-define the basic operations to get, set and delete values.
+only INI and redis types are supported but can be extended by adding your own
+adapters to define the basic operations to get, set and delete values.
 
 The keystore uri tells the type adapter how to connect to the keystore. See the
 documentation on the specific keystore type adapter for more information.
@@ -148,8 +148,8 @@ config-gen -s DEVEL
 
 # Adapters
 The adapter is responsible for marshaling data between config-gen and the
-underline storage engine where the values will persist. Currently, the only
-adapter is the ini adapter but the interface is simple if you wanted to build
+underline storage engine where the values will persist. Currently, there are
+two adapters, redis and ini. But the interface is simple if you wanted to build
 your own or extend an existing one.
 
 ## INI Adapter
@@ -178,3 +178,19 @@ some_key=Some other vaule
 _Note: If no section is provided, a default name will be used. This is not the
 ini default section but a config-gen default section. They are different,
 remember that._
+
+## Redis Adapter
+The Redis adapter is a keystore using a redis server. It is very flexable and
+allows you to share keystore values with multiple people that have access to
+that server.
+
+The URI for the redis adapter can specify the password, hostname, port, db
+index and keystore to use. Here is the structure:
+
+```redis://:<PASSWORD>@<HOSTNAME>:<PORT>/<DB_INDEX>?<KEYSTORE>```
+
+The fields password, port, and db_index are optional.
+
+The redis keystore can already exist when you add it to a library, provided it
+is in the correct format. Also, keys are stored in a redis hashmap under the
+key _keystore:<keystore>.

@@ -6,3 +6,7 @@ The following features are available in version 1.0
 - Keystore adapater model to allow for easy addition of keystore types.
 - Builtin support for ini based keystores.
 - Rendering a template using a specific or default keystore.
+
+Version 1.1
+The following features where added in version 1.1
+- Redis support for keystores.
