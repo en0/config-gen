@@ -160,7 +160,9 @@ environments or applications.
 The URI for the ini adapter can specify the path and section to use. Here is
 the structure: 
 
-```file://<PATH>?<SECTION>```
+```
+file://<PATH>?<SECTION>
+```
 
 The ini file can already exist when you add it to a library, provided it is in
 the correct format. Also, Each section is used as one keystore. This allows you
@@ -187,7 +189,9 @@ that server.
 The URI for the redis adapter can specify the password, hostname, port, db
 index and keystore to use. Here is the structure:
 
-```redis://:<PASSWORD>@<HOSTNAME>:<PORT>/<DB_INDEX>?<KEYSTORE>```
+```
+redis://:<PASSWORD>@<HOSTNAME>:<PORT>/<DB_INDEX>?<KEYSTORE>
+```
 
 The fields password, port, and db_index are optional.
 
