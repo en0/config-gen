@@ -197,4 +197,4 @@ The fields password, port, and db_index are optional.
 
 The redis keystore can already exist when you add it to a library, provided it
 is in the correct format. Also, keys are stored in a redis hashmap under the
-key _keystore:<keystore>.
+key keystore:___KEYSTORE___
